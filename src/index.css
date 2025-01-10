@@ -1,0 +1,68 @@
+/* Importing Tailwind base, components, and utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Global Styles */
+body {
+  font-family: "Inter", sans-serif; /* Default font for the app */
+  background-color: #a09bf3;
+  color: #4b5563; /* Medium gray text color for good contrast */
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Roboto", sans-serif; /* Custom font for headings */
+  color: #374151; /* Darker gray for headings */
+}
+
+/* Custom styles for better readability */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Tailwind Custom Styles */
+@layer components {
+  .btn {
+    @apply px-6 py-2 rounded-lg text-white font-semibold transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-teal-500 hover:bg-teal-600;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-500 hover:bg-gray-600;
+  }
+}
+
+@layer utilities {
+  .container {
+    @apply max-w-screen-lg mx-auto;
+  }
+
+  .rounded-custom {
+    border-radius: 16px;
+  }
+}
