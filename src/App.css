@@ -1,42 +1,172 @@
+/* Professional Todo Application Styles */
+
+/* Container adjustments */
 #root {
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  text-align: left;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Custom animations for Todo items */
+@keyframes check-animation {
+  0% {
+    transform: scale(0);
+    opacity: 0;
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@keyframes todo-complete {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
   }
 }
 
+/* Subtle hover effects */
+.todo-item {
+  transition: all 0.3s ease;
+}
+
+.todo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Visual feedback when completing todos */
+.todo-checkbox:checked + .todo-label .checkmark {
+  animation: check-animation 0.5s forwards;
+}
+
+.todo-checkbox:checked ~ .todo-progress {
+  animation: todo-complete 0.8s ease forwards;
+}
+
+/* Professional button styles with subtle feedback */
+.action-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.action-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.action-button:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0) translate(-50%, -50%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20) translate(-50%, -50%);
+    opacity: 0;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+input, select, button, a {
+  transition: all 0.2s ease;
+}
+
+/* Enhanced focus states for accessibility */
+button:focus-visible, 
+input:focus-visible, 
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
+}
+
+/* Stats cards hover effect */
+.stats-card {
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Modern scrollbar for task lists */
+.task-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.task-list::-webkit-scrollbar-thumb {
+  background-color: rgba(203, 213, 225, 0.8);
+  border-radius: 3px;
+}
+
+.task-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Priority indicator subtle shine effect */
+.priority-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.priority-indicator::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(30deg);
+  transition: all 1.5s ease;
+  opacity: 0;
+}
+
+.todo-item:hover .priority-indicator::after {
+  opacity: 1;
+  transform: rotate(30deg) translateX(100%);
+}
+
+/* Add Todo form enhancement */
+.add-todo-form {
+  transition: all 0.3s ease;
+}
+
+.add-todo-form:focus-within {
+  transform: scale(1.01);
+}
+
+/* Professional empty state styling */
+.empty-state {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.empty-state:hover {
+  opacity: 1;
+}
+
+/* Remove any default styling that conflicts with your custom design */
+.read-the-docs,
 .card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  display: none;
 }
