@@ -1,11 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 /* Importing Tailwind base, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Custom Global Styles */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
-
 :root {
   --primary-color: #2563eb;
   --primary-light: #dbeafe;
@@ -22,6 +22,63 @@
   --border-color: #e5e7eb;
 }
 
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes rainfall {
+  0% { transform: translateY(-50px); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(calc(100vh + 50px)); opacity: 0; }
+}
+
+@keyframes snowfall {
+  0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { transform: translateY(calc(100vh + 50px)) rotate(360deg); opacity: 0; }
+}
+
+@keyframes leaffall {
+  0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.8; }
+  50% { transform: translateY(calc(50vh)) rotate(180deg) translateX(30px); }
+  90% { opacity: 0.8; }
+  100% { transform: translateY(calc(100vh + 50px)) rotate(360deg) translateX(-30px); opacity: 0; }
+}
+
+@keyframes pulse-subtle {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(229, 62, 62, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   background: linear-gradient(135deg, #f0f9ff 0%, #e6fffa 100%);
@@ -32,6 +89,17 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.5s ease-in-out, color 0.5s ease-in-out;
+}
+
+body.dark {
+  --text-primary: #f3f4f6;
+  --text-secondary: #e5e7eb;
+  --text-tertiary: #9ca3af;
+  --background-light: #1f2937;
+  --background-off: #111827;
+  --border-color: #374151;
+  background: linear-gradient(135deg, #0f172a 0%, #0f766e 100%);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -50,15 +118,24 @@ textarea:focus {
   outline-offset: 2px;
 }
 
-/* Custom animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* High priority glow effect */
+.high-priority-glow {
+  animation: pulse-subtle 2s infinite;
+  position: relative;
 }
 
-@keyframes slideIn {
-  from { transform: translateX(-20px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+.high-priority-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(229, 62, 62, 0.05), transparent, rgba(229, 62, 62, 0.05));
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  pointer-events: none;
+  border-radius: 0.5rem;
 }
 
 /* Custom scrollbar styling */
@@ -105,11 +182,11 @@ textarea:focus {
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-md p-6 transition-shadow hover:shadow-lg;
+    @apply bg-white rounded-xl shadow-md p-6 transition-shadow hover:shadow-lg dark:bg-gray-800;
   }
   
   .form-input {
-    @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all;
+    @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white;
   }
   
   .tag {
@@ -117,19 +194,19 @@ textarea:focus {
   }
   
   .todo-item {
-    @apply border-l-4 rounded-lg shadow-sm bg-white p-4 transition-all hover:shadow-md animate-[fadeIn_0.3s_ease-in-out];
+    @apply border-l-4 rounded-lg shadow-sm bg-white p-4 transition-all hover:shadow-md animate-[fadeIn_0.3s_ease-in-out] dark:bg-gray-800;
   }
   
   .priority-high {
-    @apply border-red-500 bg-red-50;
+    @apply border-red-500 bg-red-50 dark:bg-red-900/20;
   }
   
   .priority-medium {
-    @apply border-orange-500 bg-orange-50;
+    @apply border-orange-500 bg-orange-50 dark:bg-orange-900/20;
   }
   
   .priority-low {
-    @apply border-green-500 bg-green-50;
+    @apply border-green-500 bg-green-50 dark:bg-green-900/20;
   }
 }
 
@@ -147,7 +224,7 @@ textarea:focus {
   }
   
   .glass-effect {
-    @apply bg-white/80 backdrop-blur-sm;
+    @apply bg-white/80 backdrop-blur-sm dark:bg-gray-900/80;
   }
   
   .ring-focus {
