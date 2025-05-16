@@ -240,6 +240,133 @@ textarea:focus {
   }
 }
 
+/* Additional styles to improve contrast */
+.todo-group-header {
+  position: relative;
+  z-index: 1;
+}
+
+.todo-group-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  opacity: 0.05;
+  z-index: -1;
+  border-radius: inherit;
+}
+
+/* Ensure text is readable on light backgrounds */
+.light .stats-card p,
+.red-white .stats-card p,
+.nature .stats-card p, 
+.ocean .stats-card p,
+.winter .stats-card p,
+.candy .stats-card p,
+.rainbow .stats-card p {
+  color: var(--text-primary) !important;
+}
+
+/* Enhanced border visibility */
+.light .border, 
+.red-white .border,
+.nature .border,
+.ocean .border,
+.winter .border,
+.candy .border,
+.rainbow .border {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Clearer section headers */
+.section-header {
+  border-width: 1px;
+  border-left-width: 4px;
+  border-style: solid;
+}
+
+/* Better visibility for dropdown items */
+.dropdown-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .dropdown-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Enhance section headers for better visibility */
+.section-headers {
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+}
+
+.dark .section-headers {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Specific styles for each section type */
+.today-section {
+  border-left: 4px solid #3b82f6; /* blue */
+}
+
+.upcoming-section {
+  border-left: 4px solid #f59e0b; /* amber */
+}
+
+.completed-section {
+  border-left: 4px solid #10b981; /* green */
+}
+
+/* Count indicators */
+.count-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.today-count {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.upcoming-count {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.completed-count {
+  background-color: #10b981;
+  color: white;
+}
+
+/* Better hover effect for theme selector */
+.theme-option {
+  transition: all 0.2s;
+}
+
+.theme-option:hover {
+  transform: translateY(-2px);
+}
+
+.active-theme {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid #3b82f6;
+}
+
+.dark .active-theme {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-left: 3px solid #3b82f6;
+}
+
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -270,4 +397,84 @@ textarea:focus {
   ::-webkit-scrollbar-thumb:hover {
     background-color: #6b7280;
   }
+}
+
+/* Add these specific styles for light themes to ensure text visibility */
+
+/* Force text color on stats cards */
+.stats-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card p:first-child {
+  font-weight: 700 !important; /* Bolder numbers */
+}
+
+.stats-card p:last-child {
+  font-weight: 500 !important; /* Medium labels */
+  color: #374151 !important; /* Dark gray text that works on all themes */
+}
+
+body.dark .stats-card p:last-child {
+  color: #e5e7eb !important; /* Light gray for dark mode */
+}
+
+/* Add a subtle background pattern to theme options */
+.theme-option {
+  position: relative;
+}
+
+.theme-option::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* Better shadow and border for dropdown items */
+.dropdown-menu-item {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.dropdown-menu-item:hover {
+  border-color: rgba(0,0,0,0.1);
+}
+
+body.dark .dropdown-menu-item:hover {
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Ensure section headers stand out on all themes */
+.todo-section-header {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Add more contrast for theme selector dropdown */
+.theme-dropdown {
+  background-color: white;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .theme-dropdown {
+  background-color: #1f2937;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }

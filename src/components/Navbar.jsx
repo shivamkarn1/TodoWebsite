@@ -1,22 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import { TbSunFilled, TbMoonFilled, TbLeaf, TbFlame, TbSnowflake, TbCandy, TbRainbow } from 'react-icons/tb';
 import { WiRaindrops } from 'react-icons/wi';
 
 const ThemeOptions = [
-  { id: 'light', name: 'Light', icon: <TbSunFilled />, colors: { primary: 'from-blue-500 to-teal-500', text: 'text-gray-800' } },
-  { id: 'dark', name: 'Dark', icon: <TbMoonFilled />, colors: { primary: 'from-gray-800 to-gray-900', text: 'text-white' } },
-  { id: 'red-white', name: 'Red & White', icon: <TbFlame />, colors: { primary: 'from-red-600 to-red-500', text: 'text-white' } },
-  { id: 'nature', name: 'Nature', icon: <TbLeaf />, colors: { primary: 'from-green-600 to-emerald-500', text: 'text-white' } },
-  { id: 'ocean', name: 'Ocean', icon: <WiRaindrops />, colors: { primary: 'from-blue-700 to-cyan-500', text: 'text-white' } },
-  { id: 'winter', name: 'Winter', icon: <TbSnowflake />, colors: { primary: 'from-indigo-500 to-blue-300', text: 'text-white' } },
-  { id: 'candy', name: 'Candy', icon: <TbCandy />, colors: { primary: 'from-pink-500 to-purple-400', text: 'text-white' } },
-  { id: 'rainbow', name: 'Rainbow', icon: <TbRainbow />, colors: { primary: 'from-purple-600 via-pink-500 to-orange-400', text: 'text-white' } },
+  { 
+    id: 'light', 
+    name: 'Light', 
+    icon: <TbSunFilled />, 
+    colors: { 
+      primary: 'from-blue-500 to-teal-500', 
+      text: 'text-gray-800',
+      gradient: '#3b82f6, #14b8a6' 
+    } 
+  },
+  { 
+    id: 'dark', 
+    name: 'Dark', 
+    icon: <TbMoonFilled />, 
+    colors: { 
+      primary: 'from-gray-800 to-gray-900', 
+      text: 'text-white',
+      gradient: '#1f2937, #111827'
+    } 
+  },
+  { 
+    id: 'red-white', 
+    name: 'Red & White', 
+    icon: <TbFlame />, 
+    colors: { 
+      primary: 'from-red-600 to-red-500', 
+      text: 'text-white',
+      gradient: '#dc2626, #ef4444' 
+    } 
+  },
+  { 
+    id: 'nature', 
+    name: 'Nature', 
+    icon: <TbLeaf />, 
+    colors: { 
+      primary: 'from-green-600 to-emerald-500', 
+      text: 'text-white',
+      gradient: '#16a34a, #10b981' 
+    } 
+  },
+  { 
+    id: 'ocean', 
+    name: 'Ocean', 
+    icon: <WiRaindrops />, 
+    colors: { 
+      primary: 'from-blue-700 to-cyan-500', 
+      text: 'text-white',
+      gradient: '#1d4ed8, #06b6d4' 
+    } 
+  },
+  { 
+    id: 'winter', 
+    name: 'Winter', 
+    icon: <TbSnowflake />, 
+    colors: { 
+      primary: 'from-indigo-500 to-blue-300', 
+      text: 'text-white',
+      gradient: '#6366f1, #93c5fd' 
+    } 
+  },
+  { 
+    id: 'candy', 
+    name: 'Candy', 
+    icon: <TbCandy />, 
+    colors: { 
+      primary: 'from-pink-500 to-purple-400', 
+      text: 'text-white',
+      gradient: '#ec4899, #a78bfa' 
+    } 
+  },
+  { 
+    id: 'rainbow', 
+    name: 'Rainbow', 
+    icon: <TbRainbow />, 
+    colors: { 
+      primary: 'from-purple-600 via-pink-500 to-orange-400', 
+      text: 'text-white',
+      gradient: '#9333ea, #ec4899, #f97316'
+    } 
+  },
 ];
 
 const Navbar = ({ currentTheme, setTheme }) => {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
   
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -35,7 +108,7 @@ const Navbar = ({ currentTheme, setTheme }) => {
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (isOpen && !event.target.closest('.theme-dropdown-container')) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
@@ -64,44 +137,76 @@ const Navbar = ({ currentTheme, setTheme }) => {
             </h1>
           </div>
           
-          {/* Theme Selector - Simplified */}
-          <div className="theme-dropdown-container relative">
+          {/* Theme Selector - Enhanced */}
+          <div className="relative" ref={dropdownRef}>
             <button 
-              onClick={() => setIsOpen(!isOpen)} 
-              className={`p-2 rounded-full transition-colors flex items-center gap-2 ${
-                scrolled 
-                  ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700' 
-                  : 'text-white hover:bg-white/20'
-              }`}
+              onClick={() => setIsOpen(!isOpen)}
+              aria-expanded={isOpen}
+              aria-haspopup="true" 
+              className={`p-2.5 rounded-lg transition-all flex items-center gap-2 shadow-sm
+                ${scrolled 
+                  ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700' 
+                  : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
             >
-              {selectedTheme.icon}
-              <span className="hidden sm:inline-block">{selectedTheme.name}</span>
+              <span className="w-5 h-5">{selectedTheme.icon}</span>
+              <span className="hidden sm:inline font-medium">{selectedTheme.name}</span>
+              
+              {/* Dropdown arrow */}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
             
-            {/* Absolutely positioned dropdown */}
+            {/* Absolutely positioned dropdown with improved visibility */}
             {isOpen && (
               <div 
-                className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 z-[100]"
-                style={{
-                  maxHeight: '80vh',
-                  overflowY: 'auto'
-                }}
+                className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg 
+                shadow-xl py-1 z-[100] border-2 border-gray-200 dark:border-gray-700"
               >
-                {ThemeOptions.map(theme => (
-                  <button
-                    key={theme.id}
-                    onClick={() => {
-                      setTheme(theme.id);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      currentTheme === theme.id ? 'bg-blue-50 dark:bg-gray-700 font-medium' : ''
-                    }`}
-                  >
-                    <span className="text-lg">{theme.icon}</span>
-                    <span>{theme.name}</span>
-                  </button>
-                ))}
+                <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="font-medium text-gray-700 dark:text-gray-200">Select Theme</h3>
+                </div>
+                
+                <div className="py-1 max-h-[60vh] overflow-y-auto">
+                  {ThemeOptions.map(theme => (
+                    <button
+                      key={theme.id}
+                      onClick={() => {
+                        setTheme(theme.id);
+                        setIsOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 flex items-center gap-3 
+                        hover:bg-gray-100 dark:hover:bg-gray-700
+                        ${currentTheme === theme.id 
+                          ? 'bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500' 
+                          : ''
+                        }
+                      `}
+                    >
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
+                        style={{ 
+                          background: `linear-gradient(to right, ${theme.colors.gradient})` 
+                        }}
+                      >
+                        <span className="text-white">{theme.icon}</span>
+                      </div>
+                      <span className={`font-medium 
+                        ${theme.id === 'light' ? 'text-gray-800' : 'text-gray-800 dark:text-gray-200'}`
+                      }>
+                        {theme.name}
+                      </span>
+                      {currentTheme === theme.id && (
+                        <svg className="h-5 w-5 ml-auto text-blue-600 dark:text-blue-400" 
+                          fill="none" strokeLinecap="round" strokeLinejoin="round" 
+                          strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
+                          <path d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
