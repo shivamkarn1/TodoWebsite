@@ -94,55 +94,33 @@ const TodoItem = forwardRef(({
   const itemRef = useRef(null);
 
   // Handle move with animation
-  const handleMove = async (direction) => {
-    // Set the movement direction for animation reference
-    setMoveDirection(direction);
-    
-    // Start animation sequence
-    if (direction === 'up') {
-      await controls.start({
-        y: -60,
-        opacity: 0.5,
-        transition: { 
-          type: "spring", 
-          stiffness: 300, 
-          damping: 30,
-          mass: 0.8
-        }
-      });
-    } else {
-      await controls.start({
-        y: 60, 
-        opacity: 0.5,
-        transition: { 
-          type: "spring", 
-          stiffness: 300, 
-          damping: 30,
-          mass: 0.8
-        }
-      });
-    }
-    
-    // Call the actual move function
+  const handleMove = (direction) => {
+    // Call the move function immediately - don't wait for animation
     onMove(todo.id, direction);
     
-    // Reset animation
-    await controls.start({
-      y: 0,
-      opacity: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 500, 
-        damping: 25,
-        mass: 0.8
-      }
+    // Simple visual feedback animation
+    controls.start({
+      y: direction === 'up' ? -5 : 5,
+      transition: { duration: 0.1 }
+    }).then(() => {
+      controls.start({
+        y: 0,
+        transition: { 
+          type: "spring", 
+          stiffness: 500, 
+          damping: 30
+        }
+      });
     });
   };
 
-  // Reset animation when component unmounts or when todo changes
+  // Cleanup the useEffect to be simpler
   useEffect(() => {
-    controls.set({ y: 0, opacity: 1 });
-  }, [todo.id, controls]);
+    return () => {
+      // Cleanup animation when component unmounts
+      controls.stop();
+    };
+  }, [controls]);
 
   // Add default values to prevent the undefined error
   const safeCategory = categoryInfo || DEFAULT_CATEGORY;
@@ -174,9 +152,7 @@ const TodoItem = forwardRef(({
       animate={controls}
       exit={{ opacity: 0, y: -20 }}
       transition={{
-        type: "spring",
-        stiffness: 500,
-        damping: 30,
+        layout: { type: "spring", stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 }
       }}
       className={`rounded-xl shadow-sm border overflow-hidden transition-colors ${

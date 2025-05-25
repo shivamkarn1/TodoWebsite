@@ -337,41 +337,76 @@ function App() {
   // Move todo up or down
   const handleMoveTodo = useCallback((id, direction) => {
     setTodos(prevTodos => {
+      // Find the index of the todo to move
       const index = prevTodos.findIndex(todo => todo.id === id);
       if (index === -1) return prevTodos;
-
+      
+      // Create a copy of the todos array
       const newTodos = [...prevTodos];
       const currentTodo = newTodos[index];
       
-      // Don't allow unpinned todos to move above pinned ones
-      if (direction === 'up' && index > 0) {
-        const targetIndex = index - 1;
-        const targetTodo = newTodos[targetIndex];
-        
-        // If moving up and current todo is unpinned, don't allow moving above pinned todos
-        if (!pinnedTodos.includes(currentTodo.id) && pinnedTodos.includes(targetTodo.id)) {
-          // Provide visual feedback via toast
-          toast.info("Can't move unpinned task above pinned tasks");
-          return prevTodos;
+      // Handle moving up
+      if (direction === 'up') {
+        // If at the top, move to the bottom (circular movement)
+        if (index === 0) {
+          // Check pin constraints
+          const lastIndex = newTodos.length - 1;
+          if (pinnedTodos.includes(currentTodo.id) && 
+              !pinnedTodos.includes(newTodos[lastIndex].id)) {
+            toast.info("Can't move pinned task below unpinned tasks");
+            return prevTodos;
+          }
+          
+          // Move from top to bottom
+          newTodos.splice(0, 1);
+          newTodos.push(currentTodo);
+        } else {
+          // Normal upward movement
+          const targetIndex = index - 1;
+          
+          // Prevent moving unpinned todos above pinned ones
+          if (!pinnedTodos.includes(currentTodo.id) && 
+              pinnedTodos.includes(newTodos[targetIndex].id)) {
+            toast.info("Can't move unpinned task above pinned tasks");
+            return prevTodos;
+          }
+          
+          // Simple swap without extra properties
+          [newTodos[index], newTodos[targetIndex]] = 
+          [newTodos[targetIndex], newTodos[index]];
         }
-        
-        // Apply the swap with custom timestamp to help with animation
-        newTodos[targetIndex] = { ...currentTodo, lastMoved: new Date().getTime() };
-        newTodos[index] = { ...targetTodo, lastMoved: new Date().getTime() };
-      } else if (direction === 'down' && index < newTodos.length - 1) {
-        const targetIndex = index + 1;
-        const targetTodo = newTodos[targetIndex];
-        
-        // If moving down and current todo is pinned, don't allow moving below unpinned todos
-        if (pinnedTodos.includes(currentTodo.id) && !pinnedTodos.includes(targetTodo.id)) {
-          toast.info("Can't move pinned task below unpinned tasks");
-          return prevTodos;
+      } 
+      // Handle moving down
+      else if (direction === 'down') {
+        // If at the bottom, move to the top (circular movement)
+        if (index === newTodos.length - 1) {
+          // Check pin constraints
+          if (!pinnedTodos.includes(currentTodo.id) && 
+              pinnedTodos.includes(newTodos[0].id)) {
+            toast.info("Can't move unpinned task above pinned tasks");
+            return prevTodos;
+          }
+          
+          // Move from bottom to top
+          newTodos.pop();
+          newTodos.unshift(currentTodo);
+        } else {
+          // Normal downward movement
+          const targetIndex = index + 1;
+          
+          // Prevent moving pinned todos below unpinned ones
+          if (pinnedTodos.includes(currentTodo.id) && 
+              !pinnedTodos.includes(newTodos[targetIndex].id)) {
+            toast.info("Can't move pinned task below unpinned tasks");
+            return prevTodos;
+          }
+          
+          // Simple swap without extra properties
+          [newTodos[index], newTodos[targetIndex]] = 
+          [newTodos[targetIndex], newTodos[index]];
         }
-        
-        // Apply the swap with custom timestamp to help with animation
-        newTodos[targetIndex] = { ...currentTodo, lastMoved: new Date().getTime() };
-        newTodos[index] = { ...targetTodo, lastMoved: new Date().getTime() };
       }
+      
       return newTodos;
     });
   }, [pinnedTodos, toast]);
