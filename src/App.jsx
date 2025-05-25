@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 // Components
 import Navbar from "./components/Navbar";
@@ -135,6 +136,32 @@ const THEME_VARIANTS = {
   },
 };
 
+const isTodayTodo = (todo) => {
+  if (todo.isCompleted) return false;
+  if (!todo.dueDate) return true; // Tasks with no due date go to today
+  
+  const dueDate = new Date(todo.dueDate);
+  dueDate.setHours(0, 0, 0, 0);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return dueDate.getTime() <= today.getTime();
+};
+
+const isUpcomingTodo = (todo) => {
+  if (todo.isCompleted) return false;
+  if (!todo.dueDate) return false;
+  
+  const dueDate = new Date(todo.dueDate);
+  dueDate.setHours(0, 0, 0, 0);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return dueDate.getTime() > today.getTime();
+};
+
 function App() {
   const [todos, setTodos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -155,6 +182,10 @@ function App() {
       return "dark";
     }
     return "light";
+  });
+  const [pinnedTodos, setPinnedTodos] = useState(() => {
+    const saved = localStorage.getItem("pinned-todos");
+    return saved ? JSON.parse(saved) : [];
   });
 
   // Load todos from localStorage on mount
@@ -186,6 +217,11 @@ function App() {
       document.body.classList.add(theme);
     }
   }, [theme]);
+
+  // Save pinned todos to localStorage
+  useEffect(() => {
+    localStorage.setItem("pinned-todos", JSON.stringify(pinnedTodos));
+  }, [pinnedTodos]);
 
   // Add new todo
   const handleAddTodo = useCallback((todoData) => {
@@ -287,6 +323,59 @@ function App() {
     setShowConfirmModal(false);
   }, [confirmAction, todos]);
 
+  // Pin or unpin a todo
+  const handlePinTodo = useCallback((id) => {
+    if (pinnedTodos.includes(id)) {
+      setPinnedTodos(prev => prev.filter(pinId => pinId !== id));
+      toast.info("Todo unpinned");
+    } else {
+      setPinnedTodos(prev => [...prev, id]);
+      toast.info("Todo pinned");
+    }
+  }, [pinnedTodos]);
+
+  // Move todo up or down
+  const handleMoveTodo = useCallback((id, direction) => {
+    setTodos(prevTodos => {
+      const index = prevTodos.findIndex(todo => todo.id === id);
+      if (index === -1) return prevTodos;
+
+      const newTodos = [...prevTodos];
+      const currentTodo = newTodos[index];
+      
+      // Don't allow unpinned todos to move above pinned ones
+      if (direction === 'up' && index > 0) {
+        const targetIndex = index - 1;
+        const targetTodo = newTodos[targetIndex];
+        
+        // If moving up and current todo is unpinned, don't allow moving above pinned todos
+        if (!pinnedTodos.includes(currentTodo.id) && pinnedTodos.includes(targetTodo.id)) {
+          // Provide visual feedback via toast
+          toast.info("Can't move unpinned task above pinned tasks");
+          return prevTodos;
+        }
+        
+        // Apply the swap with custom timestamp to help with animation
+        newTodos[targetIndex] = { ...currentTodo, lastMoved: new Date().getTime() };
+        newTodos[index] = { ...targetTodo, lastMoved: new Date().getTime() };
+      } else if (direction === 'down' && index < newTodos.length - 1) {
+        const targetIndex = index + 1;
+        const targetTodo = newTodos[targetIndex];
+        
+        // If moving down and current todo is pinned, don't allow moving below unpinned todos
+        if (pinnedTodos.includes(currentTodo.id) && !pinnedTodos.includes(targetTodo.id)) {
+          toast.info("Can't move pinned task below unpinned tasks");
+          return prevTodos;
+        }
+        
+        // Apply the swap with custom timestamp to help with animation
+        newTodos[targetIndex] = { ...currentTodo, lastMoved: new Date().getTime() };
+        newTodos[index] = { ...targetTodo, lastMoved: new Date().getTime() };
+      }
+      return newTodos;
+    });
+  }, [pinnedTodos, toast]);
+
   // Stats for UI display
   const stats = useMemo(() => {
     const total = todos.length;
@@ -307,75 +396,57 @@ function App() {
 
   // Add this useMemo to properly sort the todos
   const { todayTodos, upcomingTodos, completedTodos } = useMemo(() => {
-    // Apply filters first
-    let filteredTodos = [...todos];
-    
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      filteredTodos = filteredTodos.filter(todo => 
-        todo.todo.toLowerCase().includes(searchLower) ||
-        (todo.description && todo.description.toLowerCase().includes(searchLower))
-      );
-    }
-    
-    // Apply priority filter
-    if (priorityFilter !== "all") {
-      filteredTodos = filteredTodos.filter(todo => todo.priority === priorityFilter);
-    }
-    
-    // Apply category filter
-    if (categoryFilter !== "all") {
-      filteredTodos = filteredTodos.filter(todo => todo.category === categoryFilter);
-    }
-    
-    // Now separate into the three groups
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    // Sort todos into categories
+    // First apply search and filters
+    const filtered = todos.filter(todo => {
+      const matchesSearch = !searchTerm || 
+        todo.todo.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesPriority = priorityFilter === "all" || 
+        todo.priority === priorityFilter;
+      const matchesCategory = categoryFilter === "all" || 
+        todo.category === categoryFilter;
+      
+      return matchesSearch && matchesPriority && matchesCategory;
+    });
+
+    // Then sort by pinned status
+    const sortedTodos = [...filtered].sort((a, b) => {
+      if (pinnedTodos.includes(a.id) && !pinnedTodos.includes(b.id)) return -1;
+      if (!pinnedTodos.includes(a.id) && pinnedTodos.includes(b.id)) return 1;
+      return 0;
+    });
+
+    // Finally, categorize todos
     return {
-      todayTodos: filteredTodos.filter(todo => {
-        if (todo.isCompleted) return false;
-        if (!todo.dueDate) return true; // Tasks with no due date go to today
-        
-        const dueDate = new Date(todo.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        return dueDate.getTime() <= today.getTime();
-      }).sort((a, b) => {
-        // Sort by priority: HIGH > MEDIUM > LOW
-        const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-        return priorityOrder[a.priority || 'MEDIUM'] - priorityOrder[b.priority || 'MEDIUM'];
-      }),
-      
-      upcomingTodos: filteredTodos.filter(todo => {
-        if (todo.isCompleted) return false;
-        if (!todo.dueDate) return false; // Only tasks with due dates
-        
-        const dueDate = new Date(todo.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        return dueDate.getTime() > today.getTime();
-      }).sort((a, b) => {
-        // Sort by due date (earliest first)
-        const dateA = new Date(a.dueDate);
-        const dateB = new Date(b.dueDate);
-        return dateA - dateB;
-      }),
-      
-      completedTodos: showCompletedTodos 
-        ? filteredTodos.filter(todo => todo.isCompleted)
-            .sort((a, b) => {
-              // Sort by completion date (newest first)
-              const dateA = a.completedAt ? new Date(a.completedAt) : new Date(0);
-              const dateB = b.completedAt ? new Date(b.completedAt) : new Date(0);
-              return dateB - dateA;
-            })
-        : []
+      todayTodos: sortedTodos.filter(todo => !todo.isCompleted && isTodayTodo(todo))
+        .sort((a, b) => new Date(a.dueDate || 0) - new Date(b.dueDate || 0)),
+      upcomingTodos: sortedTodos.filter(todo => !todo.isCompleted && isUpcomingTodo(todo))
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)),
+      completedTodos: showCompletedTodos ? sortedTodos.filter(todo => todo.isCompleted)
+        .sort((a, b) => new Date(b.completedAt || 0) - new Date(a.completedAt || 0)) : []
     };
-  }, [todos, searchTerm, priorityFilter, categoryFilter, showCompletedTodos]);
+  }, [todos, searchTerm, priorityFilter, categoryFilter, pinnedTodos, showCompletedTodos]);
+
+  // Add these handlers in your App component
+  const onUpdateTodayTodos = (updatedTodos) => {
+    setTodos(prev => {
+      const otherTodos = prev.filter(todo => !isTodayTodo(todo));
+      return [...updatedTodos, ...otherTodos];
+    });
+  };
+
+  const onUpdateUpcomingTodos = (updatedTodos) => {
+    setTodos(prev => {
+      const otherTodos = prev.filter(todo => !isUpcomingTodo(todo));
+      return [...updatedTodos, ...otherTodos];
+    });
+  };
+
+  const onUpdateCompletedTodos = (updatedTodos) => {
+    setTodos(prev => {
+      const otherTodos = prev.filter(todo => !todo.isCompleted);
+      return [...updatedTodos, ...otherTodos];
+    });
+  };
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${themeStyle.bgGradient} transition-colors duration-500`}>
@@ -449,7 +520,13 @@ function App() {
           onDeleteTodo={handleDelete}
           onToggleComplete={handleToggleComplete}
           onEditTodo={handleEdit}
+          onPinTodo={handlePinTodo}
+          onMoveTodo={handleMoveTodo}
+          pinnedTodos={pinnedTodos}
           themeStyle={themeStyle}
+          onUpdateTodayTodos={onUpdateTodayTodos}
+          onUpdateUpcomingTodos={onUpdateUpcomingTodos}
+          onUpdateCompletedTodos={onUpdateCompletedTodos}
         />
       </div>
       
