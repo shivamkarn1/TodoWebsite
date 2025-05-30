@@ -4,21 +4,18 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Components
 import Navbar from "./components/Navbar";
 import TodoForm from "./components/todos/TodoForm";
 import TodoList from "./components/todos/TodoList";
 import FilterBar from "./components/todos/FilterBar";
 import ConfirmationModal from './components/ConfirmationModal';
 
-// Priority levels with corresponding colors
 const PRIORITIES = {
   HIGH: { label: "High", color: "#ef4444", },
   MEDIUM: { label: "Medium", color: "#f59e0b" },
   LOW: { label: "Low", color: "#10b981" },  
 };
 
-// Categories with colors
 const CATEGORIES = [
   { id: "work", label: "Work", color: "#3b82f6" },
   { id: "personal", label: "Personal", color: "#8b5cf6" },
@@ -27,7 +24,6 @@ const CATEGORIES = [
   { id: "other", label: "Other", color: "#6b7280" },
 ];
 
-// Theme variants
 const THEME_VARIANTS = {
   light: {
     bgGradient: "from-blue-50 to-teal-50",
@@ -146,18 +142,15 @@ function App() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState({ type: null, id: null });
   const [theme, setTheme] = useState(() => {
-    // Try to get saved theme or use system preference
     const savedTheme = localStorage.getItem("todo-theme");
     if (savedTheme) return savedTheme;
     
-    // Check for system dark mode preference
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return "dark";
     }
     return "light";
   });
 
-  // Load todos from localStorage on mount
   useEffect(() => {
     const storedTodos = localStorage.getItem("todos");
     if (storedTodos) {
@@ -165,7 +158,6 @@ function App() {
     }
   }, []);
 
-  // Save todos to localStorage whenever they change
   useEffect(() => {
     if (todos.length) {
       localStorage.setItem("todos", JSON.stringify(todos));
@@ -174,7 +166,6 @@ function App() {
     }
   }, [todos]);
 
-  // Save theme preference and update body class
   useEffect(() => {
     localStorage.setItem("todo-theme", theme);
     
@@ -187,12 +178,11 @@ function App() {
     }
   }, [theme]);
 
-  // Add new todo
   const handleAddTodo = useCallback((todoData) => {
     const newTodo = {
       id: uuidv4(),
       isCompleted: false,
-      createdAt: new Date().toISOString(), // Add timestamp
+      createdAt: new Date().toISOString(),
       ...todoData
     };
 
@@ -202,16 +192,13 @@ function App() {
     toast.success('Task added successfully!');
   }, [todos]);
 
-  // Update existing todo
   const handleUpdateTodo = useCallback((updatedTodoData) => {
-    // Find the todo being edited and update it
     const updatedTodos = todos.map(todo => {
-      // Match by ID (editMode contains the ID of the todo being edited)
       if (todo.id === editMode) {
         return { 
-          ...todo, // Keep the existing fields (especially the ID)
-          ...updatedTodoData, // Apply the updates
-          updatedAt: new Date().toISOString() // Add update timestamp
+          ...todo,
+          ...updatedTodoData,
+          updatedAt: new Date().toISOString()
         };
       }
       return todo;
@@ -220,13 +207,11 @@ function App() {
     setTodos(updatedTodos);
     localStorage.setItem('todos', JSON.stringify(updatedTodos));
     
-    // Clear edit mode
     setEditMode(null);
     
     toast.success('Task updated successfully!');
   }, [todos, editMode]);
 
-  // Toggle todo completion status
   const handleToggleComplete = useCallback((id) => {
     setTodos(prevTodos =>
       prevTodos.map(todo => {
@@ -246,25 +231,19 @@ function App() {
     );
   }, []);
 
-  // Setup todo for editing
   const handleEdit = useCallback((todo) => {
-    // Set the editMode to the ID of the todo being edited
     setEditMode(todo.id);
-    // This will cause the todoBeingEdited useMemo to run and get the todo data
   }, []);
 
-  // Prepare delete confirmation
   const handleDelete = useCallback((id) => {
     setConfirmAction({ type: 'delete', id });
     setShowConfirmModal(true);
   }, []);
 
-  // Cancel edit mode
   const handleCancelEdit = useCallback(() => {
     setEditMode(null);
   }, []);
 
-  // Prepare clear completed confirmation
   const handleClearCompleted = useCallback(() => {
     const completedCount = todos.filter(todo => todo.isCompleted).length;
     if (completedCount === 0) return;
@@ -273,7 +252,6 @@ function App() {
     setShowConfirmModal(true);
   }, [todos]);
 
-  // Handle confirmation actions (delete or clear completed)
   const confirmDelete = useCallback(() => {
     if (confirmAction.type === 'delete' && confirmAction.id) {
       setTodos(prevTodos => prevTodos.filter(todo => todo.id !== confirmAction.id));
@@ -287,7 +265,6 @@ function App() {
     setShowConfirmModal(false);
   }, [confirmAction, todos]);
 
-  // Stats for UI display
   const stats = useMemo(() => {
     const total = todos.length;
     const completed = todos.filter(t => t.isCompleted).length;
@@ -296,21 +273,16 @@ function App() {
     return { total, completed, pending };
   }, [todos]);
 
-  // Find the todo being edited
   const todoBeingEdited = useMemo(() => {
     if (!editMode) return null;
     return todos.find(todo => todo.id === editMode);
   }, [editMode, todos]);
 
-  // Get current theme styles
   const themeStyle = THEME_VARIANTS[theme] || THEME_VARIANTS.light;
 
-  // Add this useMemo to properly sort the todos
   const { todayTodos, upcomingTodos, completedTodos } = useMemo(() => {
-    // Apply filters first
     let filteredTodos = [...todos];
     
-    // Apply search filter
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
       filteredTodos = filteredTodos.filter(todo => 
@@ -319,47 +291,41 @@ function App() {
       );
     }
     
-    // Apply priority filter
     if (priorityFilter !== "all") {
       filteredTodos = filteredTodos.filter(todo => todo.priority === priorityFilter);
     }
     
-    // Apply category filter
     if (categoryFilter !== "all") {
       filteredTodos = filteredTodos.filter(todo => todo.category === categoryFilter);
     }
     
-    // Now separate into the three groups
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+    today.setHours(0, 0, 0, 0);
     
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
-    // Sort todos into categories
     return {
       todayTodos: filteredTodos.filter(todo => {
         if (todo.isCompleted) return false;
-        if (!todo.dueDate) return true; // Tasks with no due date go to today
+        if (!todo.dueDate) return true;
         
         const dueDate = new Date(todo.dueDate);
         dueDate.setHours(0, 0, 0, 0);
         return dueDate.getTime() <= today.getTime();
       }).sort((a, b) => {
-        // Sort by priority: HIGH > MEDIUM > LOW
         const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
         return priorityOrder[a.priority || 'MEDIUM'] - priorityOrder[b.priority || 'MEDIUM'];
       }),
       
       upcomingTodos: filteredTodos.filter(todo => {
         if (todo.isCompleted) return false;
-        if (!todo.dueDate) return false; // Only tasks with due dates
+        if (!todo.dueDate) return false;
         
         const dueDate = new Date(todo.dueDate);
         dueDate.setHours(0, 0, 0, 0);
         return dueDate.getTime() > today.getTime();
       }).sort((a, b) => {
-        // Sort by due date (earliest first)
         const dateA = new Date(a.dueDate);
         const dateB = new Date(b.dueDate);
         return dateA - dateB;
@@ -368,7 +334,6 @@ function App() {
       completedTodos: showCompletedTodos 
         ? filteredTodos.filter(todo => todo.isCompleted)
             .sort((a, b) => {
-              // Sort by completion date (newest first)
               const dateA = a.completedAt ? new Date(a.completedAt) : new Date(0);
               const dateB = b.completedAt ? new Date(b.completedAt) : new Date(0);
               return dateB - dateA;
@@ -382,7 +347,6 @@ function App() {
       <Navbar currentTheme={theme} setTheme={setTheme} />
       
       <div className="container mx-auto py-6 px-4 sm:px-6 max-w-4xl">
-        {/* Stats Summary with improved visibility */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <motion.div 
             className={`${themeStyle.cardBg} p-4 rounded-xl shadow-md text-center border border-gray-200 dark:border-gray-700`}
@@ -412,7 +376,6 @@ function App() {
           </motion.div>
         </div>
 
-        {/* Todo Form - Conditionally rendered based on edit mode */}
         <TodoForm
           onAddTodo={handleAddTodo}
           onUpdateTodo={handleUpdateTodo}
@@ -422,7 +385,6 @@ function App() {
           themeStyle={themeStyle}
         />
 
-        {/* Filters Bar */}
         <FilterBar
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
@@ -441,7 +403,6 @@ function App() {
           categories={CATEGORIES}
         />
         
-        {/* Todo List */}
         <TodoList
           todayTodos={todayTodos}
           upcomingTodos={upcomingTodos}
@@ -453,14 +414,12 @@ function App() {
         />
       </div>
       
-      {/* Toast notifications */}
       <ToastContainer
         position="bottom-right"
         autoClose={3000}
         theme={theme === "dark" ? "dark" : "light"}
       />
       
-      {/* Confirmation modal */}
       {showConfirmModal && (
         <ConfirmationModal
           isOpen={showConfirmModal}

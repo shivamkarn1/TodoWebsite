@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
-import { TbSunFilled, TbMoonFilled, TbLeaf, TbFlame, TbSnowflake, TbCandy, TbRainbow } from 'react-icons/tb';
+import { TbSunFilled, TbMoonFilled, TbLeaf, TbFlame, TbSnowflake, TbCandy, TbRainbow, TbSunset, TbBulb, TbCoffee } from 'react-icons/tb';
 import { WiRaindrops } from 'react-icons/wi';
 
 const ThemeOptions = [
@@ -22,16 +22,6 @@ const ThemeOptions = [
       primary: 'from-gray-800 to-gray-900', 
       text: 'text-white',
       gradient: '#1f2937, #111827'
-    } 
-  },
-  { 
-    id: 'red-white', 
-    name: 'Red & White', 
-    icon: <TbFlame />, 
-    colors: { 
-      primary: 'from-red-600 to-red-500', 
-      text: 'text-white',
-      gradient: '#dc2626, #ef4444' 
     } 
   },
   { 
@@ -65,23 +55,33 @@ const ThemeOptions = [
     } 
   },
   { 
-    id: 'candy', 
-    name: 'Candy', 
-    icon: <TbCandy />, 
+    id: 'sunset', 
+    name: 'Sunset', 
+    icon: <TbSunset />, 
     colors: { 
-      primary: 'from-pink-500 to-purple-400', 
+      primary: 'from-orange-500 to-red-400', 
       text: 'text-white',
-      gradient: '#ec4899, #a78bfa' 
+      gradient: '#f97316, #f87171' 
     } 
   },
   { 
-    id: 'rainbow', 
-    name: 'Rainbow', 
-    icon: <TbRainbow />, 
+    id: 'neon', 
+    name: 'Neon', 
+    icon: <TbBulb />, 
     colors: { 
-      primary: 'from-purple-600 via-pink-500 to-orange-400', 
+      primary: 'from-purple-600 to-pink-600', 
       text: 'text-white',
-      gradient: '#9333ea, #ec4899, #f97316'
+      gradient: '#9333ea, #db2777' 
+    } 
+  },
+  { 
+    id: 'coffee', 
+    name: 'Coffee', 
+    icon: <TbCoffee />, 
+    colors: { 
+      primary: 'from-amber-700 to-yellow-600', 
+      text: 'text-white',
+      gradient: '#b45309, #ca8a04' 
     } 
   },
 ];
