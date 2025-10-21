@@ -46,8 +46,8 @@ src/
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/shivamkarn1/todolist-v2.git
-cd todolist-v2
+git clone https://github.com/shivamkarn1/TodoWebsite.git
+cd TodoWebsite
 ```
 
 2. Install dependencies:
