@@ -33,7 +33,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600",
     buttonSecondary: "bg-gray-500 hover:bg-gray-600",
-    buttonDanger: "bg-red-500 hover:bg-red-600",
+    buttonDanger: "bg-rose-500 hover:bg-rose-600",
     inputBg: "bg-white",
     inputBorder: "border-gray-300",
     inputText: "text-gray-800",
@@ -66,7 +66,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700",
     buttonSecondary: "bg-gray-600 hover:bg-gray-700",
-    buttonDanger: "bg-red-600 hover:bg-red-700",
+    buttonDanger: "bg-red-500 hover:bg-red-600",
     inputBg: "bg-gray-700",
     inputBorder: "border-gray-600",
     inputText: "text-white",
@@ -99,7 +99,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600",
     buttonSecondary: "bg-green-500 hover:bg-green-600",
-    buttonDanger: "bg-red-500 hover:bg-red-600",
+    buttonDanger: "bg-green-600 hover:bg-green-700",
     inputBg: "bg-green-50",
     inputBorder: "border-green-300",
     inputText: "text-green-900",
@@ -132,7 +132,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-indigo-500 to-blue-400 hover:from-indigo-600 hover:to-blue-500",
     buttonSecondary: "bg-slate-500 hover:bg-slate-600",
-    buttonDanger: "bg-red-500 hover:bg-red-600",
+    buttonDanger: "bg-slate-600 hover:bg-slate-700",
     inputBg: "bg-slate-50",
     inputBorder: "border-slate-300",
     inputText: "text-slate-800",
@@ -165,7 +165,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-orange-500 to-red-400 hover:from-orange-600 hover:to-red-500",
     buttonSecondary: "bg-orange-500 hover:bg-orange-600",
-    buttonDanger: "bg-red-600 hover:bg-red-700",
+    buttonDanger: "bg-amber-700 hover:bg-amber-800",
     inputBg: "bg-orange-50",
     inputBorder: "border-orange-300",
     inputText: "text-orange-900",
@@ -198,7 +198,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
     buttonSecondary: "bg-purple-500 hover:bg-purple-600",
-    buttonDanger: "bg-red-500 hover:bg-red-600",
+    buttonDanger: "bg-fuchsia-600 hover:bg-fuchsia-700",
     inputBg: "bg-purple-50",
     inputBorder: "border-purple-300",
     inputText: "text-purple-900",
@@ -231,7 +231,7 @@ const THEME_VARIANTS = {
     buttonPrimary:
       "from-amber-700 to-yellow-600 hover:from-amber-800 hover:to-yellow-700",
     buttonSecondary: "bg-amber-600 hover:bg-amber-700",
-    buttonDanger: "bg-red-500 hover:bg-red-600",
+    buttonDanger: "bg-orange-600 hover:bg-orange-700",
     inputBg: "bg-amber-50",
     inputBorder: "border-amber-300",
     inputText: "text-amber-900",
@@ -448,7 +448,14 @@ function App() {
   useEffect(() => {
     const storedTodos = localStorage.getItem("todos");
     if (storedTodos) {
-      setTodos(JSON.parse(storedTodos));
+      const parsedTodos = JSON.parse(storedTodos);
+      // Ensure todos have the new properties with default values
+      const updatedTodos = parsedTodos.map((todo, index) => ({
+        ...todo,
+        order: todo.order !== undefined ? todo.order : index,
+        isPinned: todo.isPinned !== undefined ? todo.isPinned : false,
+      }));
+      setTodos(updatedTodos);
     }
   }, []);
 
@@ -508,6 +515,8 @@ function App() {
         id: uuidv4(),
         isCompleted: false,
         createdAt: new Date().toISOString(),
+        order: todos.length, // Add order based on current length
+        isPinned: false, // Add pinned status
         ...todoData,
       };
 
@@ -573,6 +582,105 @@ function App() {
     setShowConfirmModal(true);
   }, []);
 
+  const handleMoveUp = useCallback(
+    (id) => {
+      setTodos((prevTodos) => {
+        const todosCopy = [...prevTodos];
+        const currentIndex = todosCopy.findIndex((todo) => todo.id === id);
+
+        if (currentIndex > 0) {
+          // Swap with the previous todo
+          [todosCopy[currentIndex], todosCopy[currentIndex - 1]] = [
+            todosCopy[currentIndex - 1],
+            todosCopy[currentIndex],
+          ];
+        } else if (currentIndex === 0 && todosCopy.length > 1) {
+          // If at top, cycle to bottom
+          const todoToMove = todosCopy.splice(0, 1)[0];
+          todosCopy.push(todoToMove);
+        }
+
+        // Update order values
+        const updatedTodos = todosCopy.map((todo, index) => ({
+          ...todo,
+          order: index,
+        }));
+
+        localStorage.setItem("todos", JSON.stringify(updatedTodos));
+        return updatedTodos;
+      });
+      showThemedToast("info", "Todo moved up");
+    },
+    [showThemedToast]
+  );
+
+  const handleMoveDown = useCallback(
+    (id) => {
+      setTodos((prevTodos) => {
+        const todosCopy = [...prevTodos];
+        const currentIndex = todosCopy.findIndex((todo) => todo.id === id);
+
+        if (currentIndex < todosCopy.length - 1) {
+          // Swap with the next todo
+          [todosCopy[currentIndex], todosCopy[currentIndex + 1]] = [
+            todosCopy[currentIndex + 1],
+            todosCopy[currentIndex],
+          ];
+        } else if (
+          currentIndex === todosCopy.length - 1 &&
+          todosCopy.length > 1
+        ) {
+          // If at bottom, cycle to top
+          const todoToMove = todosCopy.splice(todosCopy.length - 1, 1)[0];
+          todosCopy.unshift(todoToMove);
+        }
+
+        // Update order values
+        const updatedTodos = todosCopy.map((todo, index) => ({
+          ...todo,
+          order: index,
+        }));
+
+        localStorage.setItem("todos", JSON.stringify(updatedTodos));
+        return updatedTodos;
+      });
+      showThemedToast("info", "Todo moved down");
+    },
+    [showThemedToast]
+  );
+
+  const handleTogglePin = useCallback(
+    (id) => {
+      setTodos((prevTodos) => {
+        const updatedTodos = prevTodos.map((todo) => {
+          if (todo.id === id) {
+            const newPinnedState = !todo.isPinned;
+            showThemedToast(
+              "success",
+              newPinnedState ? "Todo pinned!" : "Todo unpinned!"
+            );
+            return {
+              ...todo,
+              isPinned: newPinnedState,
+            };
+          }
+          return todo;
+        });
+
+        // Sort todos: pinned first, then by order
+        const sortedTodos = updatedTodos.sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          return (a.order || 0) - (b.order || 0);
+        });
+
+        localStorage.setItem("todos", JSON.stringify(sortedTodos));
+        return sortedTodos;
+      });
+    },
+    [showThemedToast]
+  );
+
   const handleCancelEdit = useCallback(() => {
     setEditMode(null);
   }, []);
@@ -629,6 +737,16 @@ function App() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // Custom sorting function that respects pinned status and user order
+    const customSort = (a, b) => {
+      // First sort by pinned status (pinned items first)
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+
+      // If both have same pinned status, sort by user-defined order
+      return (a.order || 0) - (b.order || 0);
+    };
+
     return {
       todayTodos: filteredTodos
         .filter((todo) => {
@@ -639,13 +757,7 @@ function App() {
           dueDate.setHours(0, 0, 0, 0);
           return dueDate.getTime() <= today.getTime();
         })
-        .sort((a, b) => {
-          const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-          return (
-            priorityOrder[a.priority || "MEDIUM"] -
-            priorityOrder[b.priority || "MEDIUM"]
-          );
-        }),
+        .sort(customSort),
 
       upcomingTodos: filteredTodos
         .filter((todo) => {
@@ -656,16 +768,13 @@ function App() {
           dueDate.setHours(0, 0, 0, 0);
           return dueDate.getTime() > today.getTime();
         })
-        .sort((a, b) => {
-          const dateA = new Date(a.dueDate);
-          const dateB = new Date(b.dueDate);
-          return dateA - dateB;
-        }),
+        .sort(customSort),
 
       completedTodos: showCompletedTodos
         ? filteredTodos
             .filter((todo) => todo.isCompleted)
             .sort((a, b) => {
+              // For completed todos, sort by completion date (most recent first)
               const dateA = a.completedAt
                 ? new Date(a.completedAt)
                 : new Date(0);
@@ -816,6 +925,9 @@ function App() {
           onDeleteTodo={handleDelete}
           onToggleComplete={handleToggleComplete}
           onEditTodo={handleEdit}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          onTogglePin={handleTogglePin}
           themeStyle={themeStyle}
         />
       </motion.div>
