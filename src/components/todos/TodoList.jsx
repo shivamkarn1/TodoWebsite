@@ -25,6 +25,9 @@ const TodoList = ({
   onDeleteTodo,
   onToggleComplete,
   onEditTodo,
+  onMoveUp,
+  onMoveDown,
+  onTogglePin,
   themeStyle,
 }) => {
   // Helper function to get priority info
@@ -55,6 +58,9 @@ const TodoList = ({
                 onDelete={onDeleteTodo}
                 onToggleComplete={onToggleComplete}
                 onEdit={() => onEditTodo(todo)} // Ensure we're passing the whole todo object
+                onMoveUp={onMoveUp}
+                onMoveDown={onMoveDown}
+                onTogglePin={onTogglePin}
                 themeStyle={themeStyle}
                 priorityInfo={getPriorityInfo(todo.priority)}
                 categoryInfo={getCategoryInfo(todo.category)}
@@ -82,6 +88,9 @@ const TodoList = ({
                 onDelete={onDeleteTodo}
                 onToggleComplete={onToggleComplete}
                 onEdit={() => onEditTodo(todo)} // Ensure we're passing the whole todo object
+                onMoveUp={onMoveUp}
+                onMoveDown={onMoveDown}
+                onTogglePin={onTogglePin}
                 themeStyle={themeStyle}
                 priorityInfo={getPriorityInfo(todo.priority)}
                 categoryInfo={getCategoryInfo(todo.category)}
@@ -109,6 +118,9 @@ const TodoList = ({
                 onDelete={onDeleteTodo}
                 onToggleComplete={onToggleComplete}
                 onEdit={() => onEditTodo(todo)} // Ensure we're passing the whole todo object
+                onMoveUp={onMoveUp}
+                onMoveDown={onMoveDown}
+                onTogglePin={onTogglePin}
                 themeStyle={themeStyle}
                 priorityInfo={getPriorityInfo(todo.priority)}
                 categoryInfo={getCategoryInfo(todo.category)}

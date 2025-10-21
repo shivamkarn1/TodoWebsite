@@ -8,6 +8,9 @@ import {
   FaClock,
   FaChevronDown,
   FaChevronUp,
+  FaArrowUp,
+  FaArrowDown,
+  FaThumbtack,
 } from "react-icons/fa";
 
 // Helper function to format date and time
@@ -66,6 +69,9 @@ const TodoItem = ({
   onDelete,
   onToggleComplete,
   onEdit,
+  onMoveUp,
+  onMoveDown,
+  onTogglePin,
   themeStyle,
   priorityInfo,
   categoryInfo,
@@ -98,12 +104,16 @@ const TodoItem = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2 }}
-      className={`rounded-xl shadow-lg border-2 overflow-hidden transition-all duration-300 backdrop-blur-sm hover:shadow-2xl hover:-translate-y-1 ${
+      className={`relative rounded-xl shadow-lg border-2 overflow-hidden transition-all duration-300 backdrop-blur-sm hover:shadow-2xl hover:-translate-y-1 ${
         todo.isCompleted
           ? `${themeStyle.completedBg} opacity-75 hover:opacity-90`
           : isOverdue
           ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 shadow-red-200/50 dark:shadow-red-900/30"
           : `${themeStyle.cardBg} ${themeStyle.inputBorder} hover:shadow-blue-200/30 dark:hover:shadow-blue-900/20`
+      }${
+        todo.isPinned
+          ? " ring-2 ring-yellow-400/50 dark:ring-yellow-500/40"
+          : ""
       }`}
       whileHover={{
         scale: 1.02,
@@ -111,7 +121,19 @@ const TodoItem = ({
           "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       }}
     >
-      <div className="p-4">
+      {/* Pinned indicator */}
+      {todo.isPinned && (
+        <div
+          className={`absolute top-2 left-2 ${themeStyle.textPrimary} opacity-70`}
+        >
+          <FaThumbtack
+            size={12}
+            className="rotate-45 text-yellow-600 dark:text-yellow-400"
+          />
+        </div>
+      )}
+
+      <div className={`p-4 ${todo.isPinned ? "pt-6" : ""}`}>
         <div className="flex items-start gap-3">
           {/* Checkbox */}
           <button
@@ -242,19 +264,62 @@ const TodoItem = ({
             </AnimatePresence>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-2 flex-shrink-0">
-            <button
-              onClick={() => onEdit(todo)} // Pass the entire todo object
-              className={`p-1.5 hover:${themeStyle.inputBg} rounded-full ${themeStyle.textSecondary} hover:${themeStyle.textPrimary} transition-colors`}
-            >
-              <FaEdit />
-            </button>
+          {/* Action buttons - 2x2 Grid Layout */}
+          <div className="flex flex-shrink-0 ml-2">
+            <div className="grid grid-cols-2 gap-2 min-w-[88px]">
+              {/* Top row: Pin and Move Up */}
+              <button
+                onClick={() => onTogglePin(todo.id)}
+                className={`p-2.5 rounded-lg transition-all duration-200 flex items-center justify-center ${
+                  todo.isPinned
+                    ? `bg-yellow-100 ${themeStyle.textPrimary} shadow-sm border border-yellow-300 dark:bg-yellow-900/30 dark:border-yellow-700`
+                    : `hover:${themeStyle.inputBg} ${themeStyle.textSecondary} hover:${themeStyle.textPrimary} border border-transparent hover:border-gray-200 dark:hover:border-gray-600`
+                }`}
+                title={todo.isPinned ? "Unpin todo" : "Pin todo"}
+              >
+                <FaThumbtack
+                  className={`transition-transform ${
+                    todo.isPinned
+                      ? "rotate-45 text-yellow-600 dark:text-yellow-400"
+                      : ""
+                  }`}
+                  size={14}
+                />
+              </button>
+
+              <button
+                onClick={() => onMoveUp(todo.id)}
+                className={`p-2.5 rounded-lg ${themeStyle.textSecondary} hover:${themeStyle.textPrimary} hover:${themeStyle.inputBg} transition-all duration-200 flex items-center justify-center border border-transparent hover:border-gray-200 dark:hover:border-gray-600`}
+                title="Move up"
+              >
+                <FaArrowUp size={14} />
+              </button>
+
+              {/* Bottom row: Edit and Move Down */}
+              <button
+                onClick={() => onEdit(todo)} // Pass the entire todo object
+                className={`p-2.5 hover:${themeStyle.inputBg} rounded-lg ${themeStyle.textSecondary} hover:${themeStyle.textPrimary} transition-all duration-200 flex items-center justify-center border border-transparent hover:border-gray-200 dark:hover:border-gray-600`}
+                title="Edit todo"
+              >
+                <FaEdit size={14} />
+              </button>
+
+              <button
+                onClick={() => onMoveDown(todo.id)}
+                className={`p-2.5 rounded-lg ${themeStyle.textSecondary} hover:${themeStyle.textPrimary} hover:${themeStyle.inputBg} transition-all duration-200 flex items-center justify-center border border-transparent hover:border-gray-200 dark:hover:border-gray-600`}
+                title="Move down"
+              >
+                <FaArrowDown size={14} />
+              </button>
+            </div>
+
+            {/* Delete button - separate on the right */}
             <button
               onClick={() => onDelete(todo.id)}
-              className={`p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full ${themeStyle.textSecondary} hover:text-red-500 transition-colors`}
+              className={`ml-2 p-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg ${themeStyle.textSecondary} hover:text-red-500 transition-all duration-200 flex items-center justify-center border border-transparent hover:border-red-200 dark:hover:border-red-700`}
+              title="Delete todo"
             >
-              <FaTrashAlt />
+              <FaTrashAlt size={14} />
             </button>
           </div>
         </div>
