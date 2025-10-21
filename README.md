@@ -2,6 +2,10 @@
 
 A simple and responsive todo list application built with React and Vite.
 
+## 🌐 Live Demo
+
+Check out the live application: [https://shivamtodo.vercel.app/](https://shivamtodo.vercel.app/)
+
 ## Features
 
 - Font customization
