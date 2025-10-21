@@ -1,42 +1,42 @@
-import { AnimatePresence } from 'framer-motion';
-import TodoItem from './TodoItem';
-import TodoGrouping from './TodoGrouping';
-import EmptyState from '../ui/EmptyState';
+import { AnimatePresence } from "framer-motion";
+import TodoItem from "./TodoItem";
+import TodoGrouping from "./TodoGrouping";
+import EmptyState from "../ui/EmptyState";
 
 // Define priority and category information
 const PRIORITIES = {
-  "HIGH": { id: "HIGH", label: "High", color: "#ef4444" },
-  "MEDIUM": { id: "MEDIUM", label: "Medium", color: "#f59e0b" },
-  "LOW": { id: "LOW", label: "Low", color: "#10b981" },
+  HIGH: { id: "HIGH", label: "High", color: "#ef4444" },
+  MEDIUM: { id: "MEDIUM", label: "Medium", color: "#f59e0b" },
+  LOW: { id: "LOW", label: "Low", color: "#10b981" },
 };
 
 const CATEGORIES = {
-  "work": { id: "work", label: "Work", color: "#3b82f6" },
-  "personal": { id: "personal", label: "Personal", color: "#8b5cf6" },
-  "health": { id: "health", label: "Health", color: "#10b981" },
-  "shopping": { id: "shopping", label: "Shopping", color: "#f59e0b" },
-  "other": { id: "other", label: "Other", color: "#6b7280" },
+  work: { id: "work", label: "Work", color: "#3b82f6" },
+  personal: { id: "personal", label: "Personal", color: "#8b5cf6" },
+  health: { id: "health", label: "Health", color: "#10b981" },
+  shopping: { id: "shopping", label: "Shopping", color: "#f59e0b" },
+  other: { id: "other", label: "Other", color: "#6b7280" },
 };
 
-const TodoList = ({ 
+const TodoList = ({
   todayTodos = [], // Add default empty arrays
   upcomingTodos = [],
   completedTodos = [],
   onDeleteTodo,
   onToggleComplete,
   onEditTodo,
-  themeStyle
+  themeStyle,
 }) => {
   // Helper function to get priority info
   const getPriorityInfo = (priorityId) => {
     return PRIORITIES[priorityId] || PRIORITIES.MEDIUM;
   };
-  
+
   // Helper function to get category info
   const getCategoryInfo = (categoryId) => {
     return CATEGORIES[categoryId] || CATEGORIES.other;
   };
-  
+
   return (
     <div className="space-y-6">
       {/* Today's todos */}
@@ -48,7 +48,7 @@ const TodoList = ({
       >
         {todayTodos?.length > 0 ? (
           <AnimatePresence>
-            {todayTodos.map(todo => (
+            {todayTodos.map((todo) => (
               <TodoItem
                 key={todo.id}
                 todo={todo}
@@ -62,10 +62,10 @@ const TodoList = ({
             ))}
           </AnimatePresence>
         ) : (
-          <EmptyState message="No tasks for today" />
+          <EmptyState message="No tasks for today" themeStyle={themeStyle} />
         )}
       </TodoGrouping>
-      
+
       {/* Upcoming todos */}
       <TodoGrouping
         title="Upcoming"
@@ -75,7 +75,7 @@ const TodoList = ({
       >
         {upcomingTodos?.length > 0 ? (
           <AnimatePresence>
-            {upcomingTodos.map(todo => (
+            {upcomingTodos.map((todo) => (
               <TodoItem
                 key={todo.id}
                 todo={todo}
@@ -89,10 +89,10 @@ const TodoList = ({
             ))}
           </AnimatePresence>
         ) : (
-          <EmptyState message="No upcoming tasks" />
+          <EmptyState message="No upcoming tasks" themeStyle={themeStyle} />
         )}
       </TodoGrouping>
-      
+
       {/* Completed todos */}
       <TodoGrouping
         title="Completed"
@@ -102,7 +102,7 @@ const TodoList = ({
       >
         {completedTodos?.length > 0 ? (
           <AnimatePresence>
-            {completedTodos.map(todo => (
+            {completedTodos.map((todo) => (
               <TodoItem
                 key={todo.id}
                 todo={todo}
@@ -116,7 +116,10 @@ const TodoList = ({
             ))}
           </AnimatePresence>
         ) : (
-          <EmptyState message="No completed tasks yet" />
+          <EmptyState
+            message="No completed tasks yet"
+            themeStyle={themeStyle}
+          />
         )}
       </TodoGrouping>
     </div>
